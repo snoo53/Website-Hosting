@@ -1,0 +1,227 @@
+[
+  {
+    "material_id": "mp-149",
+    "formula_pretty": "Si",
+    "elements": ["Si"],
+    "density": 2.33,
+    "band_gap": 1.14,
+    "formation_energy_per_atom": 0.0,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "cubic"
+    },
+    "volume": 40.88,
+    "nsites": 2,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-66",
+    "formula_pretty": "GaAs",
+    "elements": ["Ga", "As"],
+    "density": 5.32,
+    "band_gap": 1.42,
+    "formation_energy_per_atom": -0.52,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "cubic"
+    },
+    "volume": 45.12,
+    "nsites": 2,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-804",
+    "formula_pretty": "Fe2O3",
+    "elements": ["Fe", "O"],
+    "density": 5.24,
+    "band_gap": 2.1,
+    "formation_energy_per_atom": -2.35,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "trigonal"
+    },
+    "volume": 301.5,
+    "nsites": 10,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-30",
+    "formula_pretty": "Cu",
+    "elements": ["Cu"],
+    "density": 8.96,
+    "band_gap": 0.0,
+    "formation_energy_per_atom": 0.0,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "cubic"
+    },
+    "volume": 11.81,
+    "nsites": 1,
+    "is_metal": true
+  },
+  {
+    "material_id": "mp-2534",
+    "formula_pretty": "TiO2",
+    "elements": ["Ti", "O"],
+    "density": 4.23,
+    "band_gap": 3.2,
+    "formation_energy_per_atom": -3.12,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "tetragonal"
+    },
+    "volume": 62.43,
+    "nsites": 6,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-1143",
+    "formula_pretty": "Al",
+    "elements": ["Al"],
+    "density": 2.7,
+    "band_gap": 0.0,
+    "formation_energy_per_atom": 0.0,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "cubic"
+    },
+    "volume": 16.6,
+    "nsites": 1,
+    "is_metal": true
+  },
+  {
+    "material_id": "mp-22862",
+    "formula_pretty": "CaTiO3",
+    "elements": ["Ca", "Ti", "O"],
+    "density": 4.04,
+    "band_gap": 3.5,
+    "formation_energy_per_atom": -3.45,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "orthorhombic"
+    },
+    "volume": 223.8,
+    "nsites": 20,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-1265",
+    "formula_pretty": "ZnO",
+    "elements": ["Zn", "O"],
+    "density": 5.61,
+    "band_gap": 3.3,
+    "formation_energy_per_atom": -1.56,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "hexagonal"
+    },
+    "volume": 47.62,
+    "nsites": 4,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-19017",
+    "formula_pretty": "MgO",
+    "elements": ["Mg", "O"],
+    "density": 3.58,
+    "band_gap": 7.8,
+    "formation_energy_per_atom": -3.01,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "cubic"
+    },
+    "volume": 18.68,
+    "nsites": 2,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-2815",
+    "formula_pretty": "NaCl",
+    "elements": ["Na", "Cl"],
+    "density": 2.17,
+    "band_gap": 8.5,
+    "formation_energy_per_atom": -2.05,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "cubic"
+    },
+    "volume": 45.02,
+    "nsites": 2,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-1234",
+    "formula_pretty": "InP",
+    "elements": ["In", "P"],
+    "density": 4.81,
+    "band_gap": 1.35,
+    "formation_energy_per_atom": -0.68,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "cubic"
+    },
+    "volume": 83.6,
+    "nsites": 2,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-8062",
+    "formula_pretty": "SiC",
+    "elements": ["Si", "C"],
+    "density": 3.21,
+    "band_gap": 2.36,
+    "formation_energy_per_atom": -0.72,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "hexagonal"
+    },
+    "volume": 41.2,
+    "nsites": 4,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-1018134",
+    "formula_pretty": "BaTiO3",
+    "elements": ["Ba", "Ti", "O"],
+    "density": 6.02,
+    "band_gap": 3.2,
+    "formation_energy_per_atom": -3.78,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "tetragonal"
+    },
+    "volume": 64.4,
+    "nsites": 5,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-23155",
+    "formula_pretty": "LiCoO2",
+    "elements": ["Li", "Co", "O"],
+    "density": 5.05,
+    "band_gap": 2.7,
+    "formation_energy_per_atom": -2.89,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "trigonal"
+    },
+    "volume": 102.3,
+    "nsites": 8,
+    "is_metal": false
+  },
+  {
+    "material_id": "mp-13",
+    "formula_pretty": "Au",
+    "elements": ["Au"],
+    "density": 19.32,
+    "band_gap": 0.0,
+    "formation_energy_per_atom": 0.0,
+    "is_stable": true,
+    "symmetry": {
+      "crystal_system": "cubic"
+    },
+    "volume": 16.97,
+    "nsites": 1,
+    "is_metal": true
+  }
+]

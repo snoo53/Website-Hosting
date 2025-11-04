@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="bg-black text-white py-24 px-4 border-t border-white">
+    <footer className="bg-gray-900 text-white py-24 px-4 border-t border-gray-700">
       <div className="max-w-4xl mx-auto">
         <div className="text-center space-y-16">
           {/* Contact Information */}
@@ -25,7 +25,7 @@ export default function Footer() {
               href="#"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block px-8 py-4 bg-white hover:bg-gray-200 text-black font-medium rounded-lg transition-colors text-lg"
+              className="inline-block px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium rounded-lg transition-colors text-lg"
             >
               Access Full Research Paper
             </a>

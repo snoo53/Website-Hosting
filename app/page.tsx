@@ -16,10 +16,11 @@ export default function Home() {
           <div className="mt-12 max-w-3xl mx-auto">
             <p className="text-lg text-gray-300 leading-relaxed">
               This research project leverages advanced machine learning algorithms to identify and characterize novel
-              materials specifically suited for space engineering applications. By analyzing computational data from
-              thousands of candidate materials, we aim to accelerate the discovery of compounds with optimal properties
-              for extreme space environments, including high radiation resistance, thermal stability, and structural
-              integrity.
+              materials specifically suited for space engineering applications. Through our computational research, we
+              have curated a database of materials with optimal properties for extreme space environments, including
+              high radiation resistance, thermal stability, and structural integrity. The materials in this database
+              were specifically chosen based on our AI-driven discovery process, analyzing their suitability for
+              aerospace and space exploration applications.
             </p>
           </div>
 

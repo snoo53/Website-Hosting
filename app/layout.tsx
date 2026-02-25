@@ -9,6 +9,9 @@ const _geistMono = Geist_Mono({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: 'Aim Materials',
   description: 'A physics-enforced machine learning platform that generates novel inorganic crystal materials and validates them using a first-principles pipeline.',
+  icons: {
+    icon: '/my-project-page-1 (1).png',
+  },
 }
 
 export default function RootLayout({

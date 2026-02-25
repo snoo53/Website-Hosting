@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Search, SlidersHorizontal, Sparkles, ChevronDown, ChevronUp } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,47 +13,139 @@ interface Material {
   material_id: string
   formula_pretty: string
   elements: string[]
+  chemsys: string
   density: number
-  band_gap: number
-  formation_energy_per_atom: number
-  energy_above_hull?: number
-  is_stable: boolean
+  volume: number
+  nsites: number
+  nelements: number
   symmetry: {
     crystal_system: string
     point_group?: string
+    symbol?: string
+    number?: number
   }
-  volume: number
-  nsites: number
-  is_metal: boolean
-  energy_per_atom?: number
-  atomic_density?: number
-  // Elastic properties
-  bulk_modulus?: number
-  shear_modulus?: number
-  youngs_modulus?: number
-  // Thermal properties
-  thermal_conductivity_clarke?: number
-  thermal_conductivity_cahill?: number
-  debye_temperature?: number
-  // Elasticity scalars
-  universal_anisotropy?: number
+  universal_anisotropy: number
+  homogeneous_poisson: number
+  deprecated: boolean
+  elasticity: {
+    fitting_method: string
+    bulk_modulus: { vrh: number } | null
+    shear_modulus: { vrh: number } | null
+    young_modulus: number | null
+  } | null
+  qe_validation?: {
+    status: string
+    relax_converged: boolean
+    scf_converged: boolean
+    dft_has_elastic: boolean
+    dft_B_H: number | null
+    dft_G_H: number | null
+    dft_E_H: number | null
+    dft_nu_H: number | null
+    dft_A_U: number | null
+  }
+}
+
+function FilterSlider({
+  label,
+  range,
+  onRangeChange,
+  min,
+  max,
+  step,
+  decimalPlaces = 0,
+  formatTooltip,
+}: {
+  label: string
+  range: [number, number]
+  onRangeChange: (v: [number, number]) => void
+  min: number
+  max: number
+  step: number
+  decimalPlaces?: number
+  formatTooltip?: (v: number) => string
+}) {
+  const fmt = (v: number) => (decimalPlaces > 0 ? v.toFixed(decimalPlaces) : String(v))
+  const [minText, setMinText] = useState(() => fmt(range[0]))
+  const [maxText, setMaxText] = useState(() => fmt(range[1]))
+  const [minFocused, setMinFocused] = useState(false)
+  const [maxFocused, setMaxFocused] = useState(false)
+
+  useEffect(() => { if (!minFocused) setMinText(fmt(range[0])) }, [range[0]])
+  useEffect(() => { if (!maxFocused) setMaxText(fmt(range[1])) }, [range[1]])
+
+  const snap = (v: number) => parseFloat((Math.round(v / step) * step).toFixed(10))
+
+  const commitMin = (text: string) => {
+    const num = parseFloat(text)
+    if (isNaN(num)) { setMinText(fmt(range[0])); return }
+    const val = Math.min(snap(Math.max(min, Math.min(max, num))), range[1])
+    onRangeChange([val, range[1]])
+  }
+
+  const commitMax = (text: string) => {
+    const num = parseFloat(text)
+    if (isNaN(num)) { setMaxText(fmt(range[1])); return }
+    const val = Math.max(snap(Math.max(min, Math.min(max, num))), range[0])
+    onRangeChange([range[0], val])
+  }
+
+  const inputCls = "w-20 bg-gray-600 border border-gray-500 text-white text-sm px-2 py-1 rounded text-center focus:border-blue-500 focus:outline-none"
+
+  return (
+    <div>
+      <Label className="text-sm font-medium mb-2 block text-gray-200">{label}</Label>
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-xs text-gray-400">Min</span>
+          <input
+            type="text"
+            value={minText}
+            onChange={(e) => setMinText(e.target.value)}
+            onFocus={() => setMinFocused(true)}
+            onBlur={(e) => { setMinFocused(false); commitMin(e.target.value) }}
+            onKeyDown={(e) => { if (e.key === "Enter") { commitMin(minText); (e.target as HTMLInputElement).blur() } }}
+            className={inputCls}
+          />
+        </div>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-xs text-gray-400">Max</span>
+          <input
+            type="text"
+            value={maxText}
+            onChange={(e) => setMaxText(e.target.value)}
+            onFocus={() => setMaxFocused(true)}
+            onBlur={(e) => { setMaxFocused(false); commitMax(e.target.value) }}
+            onKeyDown={(e) => { if (e.key === "Enter") { commitMax(maxText); (e.target as HTMLInputElement).blur() } }}
+            className={inputCls}
+          />
+        </div>
+      </div>
+      <Slider
+        min={min}
+        max={max}
+        step={step}
+        value={range}
+        onValueChange={(v) => onRangeChange(v as [number, number])}
+        formatValue={formatTooltip}
+      />
+    </div>
+  )
 }
 
 export default function SearchSection() {
   const [searchQuery, setSearchQuery] = useState("")
   const [showFilters, setShowFilters] = useState(false)
-  const [densityRange, setDensityRange] = useState<[number, number]>([0, 20])
-  const [bandGapRange, setBandGapRange] = useState<[number, number]>([0, 10])
-  const [formationEnergyRange, setFormationEnergyRange] = useState<[number, number]>([-10, 0])
-  const [volumeRange, setVolumeRange] = useState<[number, number]>([0, 500])
-  const [bulkModulusRange, setBulkModulusRange] = useState<[number, number]>([0, 400])
-  const [debyeTemperatureRange, setDebyeTemperatureRange] = useState<[number, number]>([0, 1000])
+  const [densityRange, setDensityRange] = useState<[number, number]>([0, 15])
+  const [volumeRange, setVolumeRange] = useState<[number, number]>([0, 1300])
+  const [bulkModulusRange, setBulkModulusRange] = useState<[number, number]>([0, 9000])
+  const [shearModulusRange, setShearModulusRange] = useState<[number, number]>([0, 4000])
+  const [poissonRange, setPoissonRange] = useState<[number, number]>([0, 0.5])
   const [crystalSystem, setCrystalSystem] = useState<string>("all")
-  const [stableOnly, setStableOnly] = useState(false)
-  const [metalOnly, setMetalOnly] = useState<string>("all")
   const [randomMaterial, setRandomMaterial] = useState<Material | null>(null)
   const [hasSearched, setHasSearched] = useState(false)
   const [expandedMaterials, setExpandedMaterials] = useState<Set<string>>(new Set())
+  const [showAll, setShowAll] = useState(false)
 
   const materials = materialsData as Material[]
 
@@ -63,41 +155,32 @@ export default function SearchSection() {
         searchQuery === "" ||
         material.material_id.toLowerCase().includes(searchQuery.toLowerCase()) ||
         material.formula_pretty.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        material.chemsys.toLowerCase().includes(searchQuery.toLowerCase()) ||
         material.elements.some((el) => el.toLowerCase().includes(searchQuery.toLowerCase()))
 
       const matchesDensity = material.density >= densityRange[0] && material.density <= densityRange[1]
 
-      const matchesBandGap = material.band_gap >= bandGapRange[0] && material.band_gap <= bandGapRange[1]
-
-      const matchesFormationEnergy = 
-        material.formation_energy_per_atom >= formationEnergyRange[0] && 
-        material.formation_energy_per_atom <= formationEnergyRange[1]
-
       const matchesVolume = material.volume >= volumeRange[0] && material.volume <= volumeRange[1]
 
-      const matchesBulkModulus = 
-        !material.bulk_modulus || 
-        (material.bulk_modulus >= bulkModulusRange[0] && material.bulk_modulus <= bulkModulusRange[1])
+      const bulkVrh = material.elasticity?.bulk_modulus?.vrh ?? null
+      const matchesBulkModulus =
+        bulkVrh === null ||
+        (bulkVrh >= bulkModulusRange[0] && bulkVrh <= bulkModulusRange[1])
 
-      const matchesDebyeTemp = 
-        !material.debye_temperature || 
-        (material.debye_temperature >= debyeTemperatureRange[0] && material.debye_temperature <= debyeTemperatureRange[1])
+      const shearVrh = material.elasticity?.shear_modulus?.vrh ?? null
+      const matchesShearModulus =
+        shearVrh === null ||
+        (shearVrh >= shearModulusRange[0] && shearVrh <= shearModulusRange[1])
+
+      const matchesPoisson =
+        material.homogeneous_poisson >= poissonRange[0] && material.homogeneous_poisson <= poissonRange[1]
 
       const matchesCrystalSystem = crystalSystem === "all" || material.symmetry.crystal_system === crystalSystem
 
-      const matchesStability = !stableOnly || material.is_stable
-
-      const matchesMetal = 
-        metalOnly === "all" || 
-        (metalOnly === "metal" && material.is_metal) || 
-        (metalOnly === "non-metal" && !material.is_metal)
-
-      return matchesSearch && matchesDensity && matchesBandGap && matchesFormationEnergy && 
-             matchesVolume && matchesBulkModulus && matchesDebyeTemp && matchesCrystalSystem && 
-             matchesStability && matchesMetal
+      return matchesSearch && matchesDensity && matchesVolume && matchesBulkModulus &&
+             matchesShearModulus && matchesPoisson && matchesCrystalSystem
     })
-  }, [searchQuery, densityRange, bandGapRange, formationEnergyRange, volumeRange, 
-      bulkModulusRange, debyeTemperatureRange, crystalSystem, stableOnly, metalOnly, materials])
+  }, [searchQuery, densityRange, volumeRange, bulkModulusRange, shearModulusRange, poissonRange, crystalSystem, materials])
 
   const crystalSystems = useMemo(() => {
     const systems = new Set(materials.map((m) => m.symmetry.crystal_system))
@@ -124,28 +207,21 @@ export default function SearchSection() {
 
   const hasActiveFilters =
     searchQuery !== "" ||
-    densityRange[0] !== 0 ||
-    densityRange[1] !== 20 ||
-    bandGapRange[0] !== 0 ||
-    bandGapRange[1] !== 10 ||
-    formationEnergyRange[0] !== -10 ||
-    formationEnergyRange[1] !== 0 ||
-    volumeRange[0] !== 0 ||
-    volumeRange[1] !== 500 ||
-    bulkModulusRange[0] !== 0 ||
-    bulkModulusRange[1] !== 400 ||
-    debyeTemperatureRange[0] !== 0 ||
-    debyeTemperatureRange[1] !== 1000 ||
-    crystalSystem !== "all" ||
-    stableOnly ||
-    metalOnly !== "all"
+    densityRange[0] !== 0 || densityRange[1] !== 15 ||
+    volumeRange[0] !== 0 || volumeRange[1] !== 1300 ||
+    bulkModulusRange[0] !== 0 || bulkModulusRange[1] !== 9000 ||
+    shearModulusRange[0] !== 0 || shearModulusRange[1] !== 4000 ||
+    poissonRange[0] !== 0 || poissonRange[1] !== 0.5 ||
+    crystalSystem !== "all"
 
-  const shouldShowResults = hasSearched || hasActiveFilters
+  const shouldShowResults = true
 
-  const displayMaterials = randomMaterial ? [randomMaterial] : filteredMaterials.slice(0, 12)
+  useEffect(() => { setShowAll(false) }, [filteredMaterials])
+
+  const displayMaterials = randomMaterial ? [randomMaterial] : (showAll ? filteredMaterials : filteredMaterials.slice(0, 3))
 
   return (
-    <div className="w-full bg-gray-800 py-12 rounded-lg">
+    <div className="w-full bg-gray-800 py-12 rounded-lg text-left">
       <div className="max-w-6xl mx-auto px-4">
         <h2 className="text-3xl font-bold text-white text-center mb-8">Search Materials Database</h2>
 
@@ -155,7 +231,7 @@ export default function SearchSection() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <Input
                 type="text"
-                placeholder="Search by material ID, formula, or element..."
+                placeholder="Search by material ID, formula, element, or chemical system..."
                 value={searchQuery}
                 onChange={(e) => {
                   setSearchQuery(e.target.value)
@@ -184,151 +260,64 @@ export default function SearchSection() {
 
           {showFilters && (
             <div className="border-t-2 border-gray-600 pt-6 mt-6 space-y-6">
-              {/* Summary Scalars Section */}
+              {/* Summary Scalars */}
               <div>
                 <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-4">Summary Scalars</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block text-gray-200">
-                      Density (g/cm³): {densityRange[0]} - {densityRange[1]}
-                    </Label>
-                    <Slider
-                      min={0}
-                      max={20}
-                      step={0.5}
-                      value={densityRange}
-                      onValueChange={(value) => {
-                        setDensityRange(value as [number, number])
-                        setRandomMaterial(null)
-                        setHasSearched(true)
-                      }}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block text-gray-200">
-                      Volume (Ų): {volumeRange[0]} - {volumeRange[1]}
-                    </Label>
-                    <Slider
-                      min={0}
-                      max={500}
-                      step={10}
-                      value={volumeRange}
-                      onValueChange={(value) => {
-                        setVolumeRange(value as [number, number])
-                        setRandomMaterial(null)
-                        setHasSearched(true)
-                      }}
-                      className="mt-2"
-                    />
-                  </div>
+                  <FilterSlider
+                    label="Density (g/cm³)"
+                    range={densityRange}
+                    onRangeChange={(v) => { setDensityRange(v); setRandomMaterial(null); setHasSearched(true) }}
+                    min={0} max={15} step={0.1} decimalPlaces={1}
+                    formatTooltip={(v) => `${v.toFixed(1)} g/cm³`}
+                  />
+                  <FilterSlider
+                    label="Volume (Ų)"
+                    range={volumeRange}
+                    onRangeChange={(v) => { setVolumeRange(v); setRandomMaterial(null); setHasSearched(true) }}
+                    min={0} max={1300} step={1}
+                    formatTooltip={(v) => `${v} Ų`}
+                  />
                 </div>
               </div>
 
-              {/* Energy Properties Section */}
-              <div className="border-t border-gray-600 pt-4">
-                <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-4">Energy Properties</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block text-gray-200">
-                      Band Gap (eV): {bandGapRange[0]} - {bandGapRange[1]}
-                    </Label>
-                    <Slider
-                      min={0}
-                      max={10}
-                      step={0.1}
-                      value={bandGapRange}
-                      onValueChange={(value) => {
-                        setBandGapRange(value as [number, number])
-                        setRandomMaterial(null)
-                        setHasSearched(true)
-                      }}
-                      className="mt-2"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block text-gray-200">
-                      Formation Energy (eV/atom): {formationEnergyRange[0]} - {formationEnergyRange[1]}
-                    </Label>
-                    <Slider
-                      min={-10}
-                      max={0}
-                      step={0.1}
-                      value={formationEnergyRange}
-                      onValueChange={(value) => {
-                        setFormationEnergyRange(value as [number, number])
-                        setRandomMaterial(null)
-                        setHasSearched(true)
-                      }}
-                      className="mt-2"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Elastic Properties Section */}
+              {/* Elastic Properties */}
               <div className="border-t border-gray-600 pt-4">
                 <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-4">Elastic Properties</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block text-gray-200">
-                      Bulk Modulus (GPa): {bulkModulusRange[0]} - {bulkModulusRange[1]}
-                    </Label>
-                    <Slider
-                      min={0}
-                      max={400}
-                      step={10}
-                      value={bulkModulusRange}
-                      onValueChange={(value) => {
-                        setBulkModulusRange(value as [number, number])
-                        setRandomMaterial(null)
-                        setHasSearched(true)
-                      }}
-                      className="mt-2"
-                    />
-                  </div>
+                  <FilterSlider
+                    label="Bulk Modulus (GPa)"
+                    range={bulkModulusRange}
+                    onRangeChange={(v) => { setBulkModulusRange(v); setRandomMaterial(null); setHasSearched(true) }}
+                    min={0} max={9000} step={10}
+                    formatTooltip={(v) => `${v} GPa`}
+                  />
+                  <FilterSlider
+                    label="Shear Modulus (GPa)"
+                    range={shearModulusRange}
+                    onRangeChange={(v) => { setShearModulusRange(v); setRandomMaterial(null); setHasSearched(true) }}
+                    min={0} max={4000} step={10}
+                    formatTooltip={(v) => `${v} GPa`}
+                  />
+                  <FilterSlider
+                    label="Poisson's Ratio"
+                    range={poissonRange}
+                    onRangeChange={(v) => { setPoissonRange(v); setRandomMaterial(null); setHasSearched(true) }}
+                    min={0} max={0.5} step={0.01} decimalPlaces={2}
+                    formatTooltip={(v) => v.toFixed(2)}
+                  />
                 </div>
               </div>
 
-              {/* Thermal Properties Section */}
+              {/* Crystal System */}
               <div className="border-t border-gray-600 pt-4">
-                <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-4">Thermal Properties</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block text-gray-200">
-                      Debye Temperature (K): {debyeTemperatureRange[0]} - {debyeTemperatureRange[1]}
-                    </Label>
-                    <Slider
-                      min={0}
-                      max={1000}
-                      step={50}
-                      value={debyeTemperatureRange}
-                      onValueChange={(value) => {
-                        setDebyeTemperatureRange(value as [number, number])
-                        setRandomMaterial(null)
-                        setHasSearched(true)
-                      }}
-                      className="mt-2"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Material Classification Section */}
-              <div className="border-t border-gray-600 pt-4">
-                <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-4">Material Classification</h3>
+                <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-4">Crystal Structure</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
                     <Label className="text-sm font-medium mb-2 block text-gray-200">Crystal System</Label>
                     <Select
                       value={crystalSystem}
-                      onValueChange={(value) => {
-                        setCrystalSystem(value)
-                        setRandomMaterial(null)
-                        setHasSearched(true)
-                      }}
+                      onValueChange={(value) => { setCrystalSystem(value); setRandomMaterial(null); setHasSearched(true) }}
                     >
                       <SelectTrigger className="bg-gray-600 border-2 border-gray-500 text-white focus:border-blue-500">
                         <SelectValue />
@@ -336,50 +325,10 @@ export default function SearchSection() {
                       <SelectContent>
                         <SelectItem value="all">All Systems</SelectItem>
                         {crystalSystems.map((system) => (
-                          <SelectItem key={system} value={system}>
-                            {system}
-                          </SelectItem>
+                          <SelectItem key={system} value={system}>{system}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block text-gray-200">Material Type</Label>
-                    <Select
-                      value={metalOnly}
-                      onValueChange={(value) => {
-                        setMetalOnly(value)
-                        setRandomMaterial(null)
-                        setHasSearched(true)
-                      }}
-                    >
-                      <SelectTrigger className="bg-gray-600 border-2 border-gray-500 text-white focus:border-blue-500">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Types</SelectItem>
-                        <SelectItem value="metal">Metals Only</SelectItem>
-                        <SelectItem value="non-metal">Non-Metals Only</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id="stable"
-                      checked={stableOnly}
-                      onChange={(e) => {
-                        setStableOnly(e.target.checked)
-                        setRandomMaterial(null)
-                        setHasSearched(true)
-                      }}
-                      className="h-4 w-4 border-2 border-gray-500"
-                    />
-                    <Label htmlFor="stable" className="text-sm font-medium cursor-pointer text-gray-200">
-                      Stable materials only
-                    </Label>
                   </div>
                 </div>
               </div>
@@ -391,21 +340,20 @@ export default function SearchSection() {
           <>
             <div className="text-white text-center mb-6">
               {randomMaterial ? (
-                <p className="text-lg">
-                  <span className="font-bold">Random Material Selected</span>
-                </p>
+                <p className="text-lg"><span className="font-bold">Random Material Selected</span></p>
               ) : (
                 <p className="text-lg">
                   Found <span className="font-bold">{filteredMaterials.length}</span> materials
-                  {filteredMaterials.length > 12 && " (showing first 12)"}
+                  {!showAll && filteredMaterials.length > 3 && " (showing first 3)"}
                 </p>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {displayMaterials.map((material) => {
+            <div className="max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {displayMaterials.map((material) => {
                 const isExpanded = expandedMaterials.has(material.material_id)
-                
+
                 return (
                   <div
                     key={material.material_id}
@@ -415,24 +363,25 @@ export default function SearchSection() {
                       <div>
                         <h3 className="text-xl font-bold text-white mb-1">{material.formula_pretty}</h3>
                         <p className="text-sm text-gray-400">{material.material_id}</p>
+                        <p className="text-xs text-gray-500 mt-0.5">{material.chemsys}</p>
                       </div>
                       <div className="flex gap-1">
-                        {material.is_stable && (
-                          <span className="bg-blue-600 text-white text-xs px-2 py-1 rounded">Stable</span>
+                        {material.elasticity?.fitting_method === "ml_predicted_proxy" && (
+                          <span className="bg-purple-700 text-white text-xs px-2 py-1 rounded">ML</span>
                         )}
-                        {material.is_metal && (
-                          <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded">Metal</span>
+                        {material.elasticity?.fitting_method === "ml_predicted" && (
+                          <span className="bg-blue-800 text-white text-xs px-2 py-1 rounded">ML</span>
                         )}
                       </div>
                     </div>
 
                     <div className="space-y-3 text-sm">
-                      {/* Summary Scalars Section - Always visible */}
+                      {/* Summary Scalars - Always visible */}
                       <div className="space-y-1">
                         <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Summary Scalars</h4>
                         <div className="flex justify-between">
                           <span className="text-gray-400">Density:</span>
-                          <span className="font-medium text-gray-200">{material.density.toFixed(2)} g/cm³</span>
+                          <span className="font-medium text-gray-200">{material.density.toFixed(3)} g/cm³</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-gray-400">Volume:</span>
@@ -450,100 +399,50 @@ export default function SearchSection() {
 
                       {isExpanded && (
                         <>
-                          {/* Energy Properties Section */}
+                          {/* Elastic Properties */}
                           <div className="border-t border-gray-600 pt-2 space-y-1">
-                            <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Energy Properties</h4>
+                            <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Elastic Properties</h4>
+                            {material.elasticity?.bulk_modulus?.vrh != null && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-400">Bulk Modulus:</span>
+                                <span className="font-medium text-gray-200">{material.elasticity.bulk_modulus!.vrh.toFixed(2)} GPa</span>
+                              </div>
+                            )}
+                            {material.elasticity?.shear_modulus?.vrh != null && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-400">Shear Modulus:</span>
+                                <span className="font-medium text-gray-200">{material.elasticity.shear_modulus!.vrh.toFixed(2)} GPa</span>
+                              </div>
+                            )}
+                            {material.elasticity?.young_modulus != null && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-400">Young&apos;s Modulus:</span>
+                                <span className="font-medium text-gray-200">{material.elasticity.young_modulus!.toFixed(2)} GPa</span>
+                              </div>
+                            )}
                             <div className="flex justify-between">
-                              <span className="text-gray-400">Formation Energy:</span>
-                              <span className="font-medium text-gray-200">
-                                {material.formation_energy_per_atom.toFixed(3)} eV/atom
-                              </span>
+                              <span className="text-gray-400">Poisson&apos;s Ratio:</span>
+                              <span className="font-medium text-gray-200">{material.homogeneous_poisson.toFixed(4)}</span>
                             </div>
-                            {material.energy_above_hull !== undefined && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-400">Energy Above Hull:</span>
-                                <span className="font-medium text-gray-200">
-                                  {material.energy_above_hull.toFixed(3)} eV/atom
-                                </span>
-                              </div>
-                            )}
-                            {material.energy_per_atom !== undefined && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-400">Energy Per Atom:</span>
-                                <span className="font-medium text-gray-200">
-                                  {material.energy_per_atom.toFixed(3)} eV/atom
-                                </span>
-                              </div>
-                            )}
                             <div className="flex justify-between">
-                              <span className="text-gray-400">Band Gap:</span>
-                              <span className="font-medium text-gray-200">{material.band_gap.toFixed(2)} eV</span>
+                              <span className="text-gray-400">Anisotropy:</span>
+                              <span className="font-medium text-gray-200">{material.universal_anisotropy.toFixed(4)}</span>
                             </div>
                           </div>
 
-                          {/* Elastic Properties Section (if available) */}
-                          {(material.bulk_modulus || material.shear_modulus || material.youngs_modulus) && (
-                            <div className="border-t border-gray-600 pt-2 space-y-1">
-                              <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Elastic Properties</h4>
-                              {material.bulk_modulus !== undefined && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-400">Bulk Modulus:</span>
-                                  <span className="font-medium text-gray-200">{material.bulk_modulus.toFixed(1)} GPa</span>
-                                </div>
-                              )}
-                              {material.shear_modulus !== undefined && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-400">Shear Modulus:</span>
-                                  <span className="font-medium text-gray-200">{material.shear_modulus.toFixed(1)} GPa</span>
-                                </div>
-                              )}
-                              {material.youngs_modulus !== undefined && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-400">Young's Modulus:</span>
-                                  <span className="font-medium text-gray-200">{material.youngs_modulus.toFixed(1)} GPa</span>
-                                </div>
-                              )}
-                              {material.universal_anisotropy !== undefined && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-400">Anisotropy:</span>
-                                  <span className="font-medium text-gray-200">{material.universal_anisotropy.toFixed(3)}</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Thermal Properties Section (if available) */}
-                          {(material.thermal_conductivity_clarke || material.thermal_conductivity_cahill || material.debye_temperature) && (
-                            <div className="border-t border-gray-600 pt-2 space-y-1">
-                              <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Thermal Properties</h4>
-                              {material.thermal_conductivity_clarke !== undefined && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-400">Therm. Cond. (Clarke):</span>
-                                  <span className="font-medium text-gray-200">{material.thermal_conductivity_clarke.toFixed(2)} W/mK</span>
-                                </div>
-                              )}
-                              {material.thermal_conductivity_cahill !== undefined && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-400">Therm. Cond. (Cahill):</span>
-                                  <span className="font-medium text-gray-200">{material.thermal_conductivity_cahill.toFixed(2)} W/mK</span>
-                                </div>
-                              )}
-                              {material.debye_temperature !== undefined && (
-                                <div className="flex justify-between">
-                                  <span className="text-gray-400">Debye Temp.:</span>
-                                  <span className="font-medium text-gray-200">{material.debye_temperature.toFixed(1)} K</span>
-                                </div>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Symmetry Section */}
+                          {/* Symmetry */}
                           <div className="border-t border-gray-600 pt-2 space-y-1">
                             <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Symmetry</h4>
                             <div className="flex justify-between">
                               <span className="text-gray-400">Crystal System:</span>
                               <span className="font-medium text-gray-200">{material.symmetry.crystal_system}</span>
                             </div>
+                            {material.symmetry.symbol && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-400">Space Group:</span>
+                                <span className="font-medium text-gray-200">{material.symmetry.symbol} (#{material.symmetry.number})</span>
+                              </div>
+                            )}
                             {material.symmetry.point_group && (
                               <div className="flex justify-between">
                                 <span className="text-gray-400">Point Group:</span>
@@ -560,21 +459,27 @@ export default function SearchSection() {
                       className="mt-4 w-full flex items-center justify-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium py-2 border-t border-gray-600 transition-colors"
                     >
                       {isExpanded ? (
-                        <>
-                          <span>Show Less</span>
-                          <ChevronUp className="h-4 w-4" />
-                        </>
+                        <><span>Show Less</span><ChevronUp className="h-4 w-4" /></>
                       ) : (
-                        <>
-                          <span>Show More Details</span>
-                          <ChevronDown className="h-4 w-4" />
-                        </>
+                        <><span>Show More Details</span><ChevronDown className="h-4 w-4" /></>
                       )}
                     </button>
                   </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
+
+            {!randomMaterial && filteredMaterials.length > 3 && (
+              <div className="text-center mt-6">
+                <button
+                  onClick={() => { if (showAll) setExpandedMaterials(new Set()); setShowAll(!showAll) }}
+                  className="px-6 py-2 border border-gray-500 text-gray-300 hover:border-blue-500 hover:text-blue-400 rounded-lg text-sm font-medium transition-colors"
+                >
+                  {showAll ? 'Show Less' : `Show ${filteredMaterials.length - 3} more results`}
+                </button>
+              </div>
+            )}
 
             {displayMaterials.length === 0 && (
               <div className="text-center text-white py-12">
@@ -586,9 +491,9 @@ export default function SearchSection() {
         ) : (
           <div className="text-center text-white py-12">
             <Search className="h-16 w-16 mx-auto mb-4 text-gray-500" />
-            <p className="text-xl mb-2">Ready to explore materials?</p>
+            <p className="text-xl mb-2">Ready to explore Aim materials?</p>
             <p className="text-gray-400">
-              Use the search bar, apply filters, or click "Feeling Lucky?" to get started.
+              Use the search bar, apply filters, or click &quot;Feeling Lucky?&quot; to get started.
             </p>
           </div>
         )}

@@ -10,6 +10,7 @@ export default function Footer() {
               <h2 className="text-3xl md:text-4xl font-bold text-white">Contact</h2>
               <div className="text-lg text-gray-300 space-y-3">
                 <div>
+                  <p className="text-sm text-gray-400 uppercase tracking-wider mb-2 font-semibold">Founder & Research Lead</p>
                   <p>Sunwoo Lee</p>
                   <a
                     href="mailto:sunwoolee0530@gmail.com"
@@ -38,6 +39,16 @@ export default function Footer() {
                 Read the Full Paper
               </a>
               <p className="text-sm text-gray-400">Manuscript in preparation for submission to Computational Materials Science</p>
+
+              <h3 className="text-3xl md:text-4xl font-bold text-white pt-4">MPContribs</h3>
+              <a
+                href="https://next-gen.materialsproject.org/contribs/projects/aim_materials_v1"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium rounded-lg transition-colors text-lg"
+              >
+                MPContribs Explorer
+              </a>
             </div>
           </div>
 

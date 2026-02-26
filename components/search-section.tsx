@@ -90,14 +90,13 @@ function FilterSlider({
     onRangeChange([range[0], val])
   }
 
-  const inputCls = "w-20 bg-gray-600 border border-gray-500 text-white text-sm px-2 py-1 rounded text-center focus:border-blue-500 focus:outline-none"
+  const inputCls = "w-14 bg-gray-600 border border-gray-500 text-white text-xs px-1 py-0.5 rounded text-center focus:border-blue-500 focus:outline-none"
 
   return (
     <div>
-      <Label className="text-sm font-medium mb-2 block text-gray-200">{label}</Label>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-xs text-gray-400">Min</span>
+      <div className="flex items-center justify-between mb-1">
+        <Label className="text-xs font-medium text-gray-200">{label}</Label>
+        <div className="flex items-center gap-1">
           <input
             type="text"
             value={minText}
@@ -107,9 +106,7 @@ function FilterSlider({
             onKeyDown={(e) => { if (e.key === "Enter") { commitMin(minText); (e.target as HTMLInputElement).blur() } }}
             className={inputCls}
           />
-        </div>
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-xs text-gray-400">Max</span>
+          <span className="text-gray-500 text-xs">–</span>
           <input
             type="text"
             value={maxText}
@@ -221,12 +218,13 @@ export default function SearchSection() {
   const displayMaterials = randomMaterial ? [randomMaterial] : (showAll ? filteredMaterials : filteredMaterials.slice(0, 3))
 
   return (
-    <div className="w-full bg-gray-800 py-12 rounded-lg text-left">
-      <div className="max-w-6xl mx-auto px-4">
-        <h2 className="text-3xl font-bold text-white text-center mb-8">Search Materials Database</h2>
+    <div className="w-full bg-gray-800 py-8 rounded-lg text-left">
+      <div className="max-w-7xl mx-auto px-4">
+        <h2 className="text-3xl font-bold text-white text-center mb-6">Search Materials Database</h2>
 
-        <div className="bg-gray-700 rounded-lg border-2 border-gray-600 p-6 mb-6">
-          <div className="flex gap-4 mb-4">
+        {/* Search bar — full width */}
+        <div className="bg-gray-700 rounded-lg border-2 border-gray-600 p-6 mb-4">
+          <div className="flex gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <Input
@@ -257,13 +255,29 @@ export default function SearchSection() {
               Feeling Lucky?
             </Button>
           </div>
+        </div>
 
+        {/* Found n materials — full width above filter+results */}
+        {shouldShowResults && (
+          <div className="text-white text-center mb-4">
+            {randomMaterial ? (
+              <p className="text-lg"><span className="font-bold">Random Material Selected</span></p>
+            ) : (
+              <p className="text-lg">
+                Found <span className="font-bold">{filteredMaterials.length}</span> materials
+                {!showAll && filteredMaterials.length > 3 && " (showing first 3)"}
+              </p>
+            )}
+          </div>
+        )}
+
+        {/* Filter panel + Results — side by side, both start at same Y */}
+        <div className="flex gap-4 items-start">
           {showFilters && (
-            <div className="border-t-2 border-gray-600 pt-6 mt-6 space-y-6">
-              {/* Summary Scalars */}
+            <div className="w-64 shrink-0 bg-gray-700 rounded-lg border-2 border-gray-600 p-3 space-y-2 max-h-[420px] overflow-y-auto">
               <div>
-                <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-4">Summary Scalars</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1.5">Summary Scalars</h3>
+                <div className="space-y-2">
                   <FilterSlider
                     label="Density (g/cm³)"
                     range={densityRange}
@@ -280,11 +294,9 @@ export default function SearchSection() {
                   />
                 </div>
               </div>
-
-              {/* Elastic Properties */}
-              <div className="border-t border-gray-600 pt-4">
-                <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-4">Elastic Properties</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="border-t border-gray-600 pt-2">
+                <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1.5">Elastic Properties</h3>
+                <div className="space-y-2">
                   <FilterSlider
                     label="Bulk Modulus (GPa)"
                     range={bulkModulusRange}
@@ -308,195 +320,181 @@ export default function SearchSection() {
                   />
                 </div>
               </div>
-
-              {/* Crystal System */}
-              <div className="border-t border-gray-600 pt-4">
-                <h3 className="text-sm font-bold text-blue-400 uppercase tracking-wider mb-4">Crystal Structure</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <Label className="text-sm font-medium mb-2 block text-gray-200">Crystal System</Label>
-                    <Select
-                      value={crystalSystem}
-                      onValueChange={(value) => { setCrystalSystem(value); setRandomMaterial(null); setHasSearched(true) }}
-                    >
-                      <SelectTrigger className="bg-gray-600 border-2 border-gray-500 text-white focus:border-blue-500">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="all">All Systems</SelectItem>
-                        {crystalSystems.map((system) => (
-                          <SelectItem key={system} value={system}>{system}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
+              <div className="border-t border-gray-600 pt-2">
+                <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1.5">Crystal Structure</h3>
+                <Label className="text-xs font-medium mb-1 block text-gray-200">Crystal System</Label>
+                <Select
+                  value={crystalSystem}
+                  onValueChange={(value) => { setCrystalSystem(value); setRandomMaterial(null); setHasSearched(true) }}
+                >
+                  <SelectTrigger className="bg-gray-600 border-2 border-gray-500 text-white focus:border-blue-500 text-sm">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Systems</SelectItem>
+                    {crystalSystems.map((system) => (
+                      <SelectItem key={system} value={system}>{system}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}
-        </div>
 
-        {shouldShowResults ? (
-          <>
-            <div className="text-white text-center mb-6">
-              {randomMaterial ? (
-                <p className="text-lg"><span className="font-bold">Random Material Selected</span></p>
-              ) : (
-                <p className="text-lg">
-                  Found <span className="font-bold">{filteredMaterials.length}</span> materials
-                  {!showAll && filteredMaterials.length > 3 && " (showing first 3)"}
-                </p>
-              )}
-            </div>
+          {/* Results column */}
+          <div className="flex-1 min-w-0">
+          {shouldShowResults ? (
+              <>
+                <div className="max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
+                  <div className={`grid gap-6 ${showFilters ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"}`}>
+                    {displayMaterials.map((material) => {
+                    const isExpanded = expandedMaterials.has(material.material_id)
 
-            <div className="max-h-[800px] overflow-y-auto pr-2 custom-scrollbar">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {displayMaterials.map((material) => {
-                const isExpanded = expandedMaterials.has(material.material_id)
-
-                return (
-                  <div
-                    key={material.material_id}
-                    className="bg-gray-700 border-2 border-gray-600 rounded-lg p-6 hover:shadow-lg hover:border-blue-500 transition-all"
-                  >
-                    <div className="flex justify-between items-start mb-4">
-                      <div>
-                        <h3 className="text-xl font-bold text-white mb-1">{material.formula_pretty}</h3>
-                        <p className="text-sm text-gray-400">{material.material_id}</p>
-                        <p className="text-xs text-gray-500 mt-0.5">{material.chemsys}</p>
-                      </div>
-                      <div className="flex gap-1">
-                        {material.elasticity?.fitting_method === "ml_predicted_proxy" && (
-                          <span className="bg-purple-700 text-white text-xs px-2 py-1 rounded">ML</span>
-                        )}
-                        {material.elasticity?.fitting_method === "ml_predicted" && (
-                          <span className="bg-blue-800 text-white text-xs px-2 py-1 rounded">ML</span>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="space-y-3 text-sm">
-                      {/* Summary Scalars - Always visible */}
-                      <div className="space-y-1">
-                        <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Summary Scalars</h4>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Density:</span>
-                          <span className="font-medium text-gray-200">{material.density.toFixed(3)} g/cm³</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Volume:</span>
-                          <span className="font-medium text-gray-200">{material.volume.toFixed(2)} Ų</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Sites:</span>
-                          <span className="font-medium text-gray-200">{material.nsites}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Elements:</span>
-                          <span className="font-medium text-gray-200">{material.elements.join(", ")}</span>
-                        </div>
-                      </div>
-
-                      {isExpanded && (
-                        <>
-                          {/* Elastic Properties */}
-                          <div className="border-t border-gray-600 pt-2 space-y-1">
-                            <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Elastic Properties</h4>
-                            {material.elasticity?.bulk_modulus?.vrh != null && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-400">Bulk Modulus:</span>
-                                <span className="font-medium text-gray-200">{material.elasticity.bulk_modulus!.vrh.toFixed(2)} GPa</span>
-                              </div>
+                    return (
+                      <div
+                        key={material.material_id}
+                        className="bg-gray-700 border-2 border-gray-600 rounded-lg p-6 hover:shadow-lg hover:border-blue-500 transition-all"
+                      >
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h3 className="text-xl font-bold text-white mb-1">{material.formula_pretty}</h3>
+                            <p className="text-sm text-gray-400">{material.material_id}</p>
+                            <p className="text-xs text-gray-500 mt-0.5">{material.chemsys}</p>
+                          </div>
+                          <div className="flex gap-1">
+                            {material.elasticity?.fitting_method === "ml_predicted_proxy" && (
+                              <span className="bg-purple-700 text-white text-xs px-2 py-1 rounded">ML</span>
                             )}
-                            {material.elasticity?.shear_modulus?.vrh != null && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-400">Shear Modulus:</span>
-                                <span className="font-medium text-gray-200">{material.elasticity.shear_modulus!.vrh.toFixed(2)} GPa</span>
-                              </div>
+                            {material.elasticity?.fitting_method === "ml_predicted" && (
+                              <span className="bg-blue-800 text-white text-xs px-2 py-1 rounded">ML</span>
                             )}
-                            {material.elasticity?.young_modulus != null && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-400">Young&apos;s Modulus:</span>
-                                <span className="font-medium text-gray-200">{material.elasticity.young_modulus!.toFixed(2)} GPa</span>
-                              </div>
-                            )}
+                          </div>
+                        </div>
+
+                        <div className="space-y-3 text-sm">
+                          {/* Summary Scalars - Always visible */}
+                          <div className="space-y-1">
+                            <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Summary Scalars</h4>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">Poisson&apos;s Ratio:</span>
-                              <span className="font-medium text-gray-200">{material.homogeneous_poisson.toFixed(4)}</span>
+                              <span className="text-gray-400">Density:</span>
+                              <span className="font-medium text-gray-200">{material.density.toFixed(3)} g/cm³</span>
                             </div>
                             <div className="flex justify-between">
-                              <span className="text-gray-400">Anisotropy:</span>
-                              <span className="font-medium text-gray-200">{material.universal_anisotropy.toFixed(4)}</span>
+                              <span className="text-gray-400">Volume:</span>
+                              <span className="font-medium text-gray-200">{material.volume.toFixed(2)} Ų</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Sites:</span>
+                              <span className="font-medium text-gray-200">{material.nsites}</span>
+                            </div>
+                            <div className="flex justify-between">
+                              <span className="text-gray-400">Elements:</span>
+                              <span className="font-medium text-gray-200">{material.elements.join(", ")}</span>
                             </div>
                           </div>
 
-                          {/* Symmetry */}
-                          <div className="border-t border-gray-600 pt-2 space-y-1">
-                            <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Symmetry</h4>
-                            <div className="flex justify-between">
-                              <span className="text-gray-400">Crystal System:</span>
-                              <span className="font-medium text-gray-200">{material.symmetry.crystal_system}</span>
-                            </div>
-                            {material.symmetry.symbol && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-400">Space Group:</span>
-                                <span className="font-medium text-gray-200">{material.symmetry.symbol} (#{material.symmetry.number})</span>
+                          {isExpanded && (
+                            <>
+                              {/* Elastic Properties */}
+                              <div className="border-t border-gray-600 pt-2 space-y-1">
+                                <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Elastic Properties</h4>
+                                {material.elasticity?.bulk_modulus?.vrh != null && (
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-400">Bulk Modulus:</span>
+                                    <span className="font-medium text-gray-200">{material.elasticity.bulk_modulus!.vrh.toFixed(2)} GPa</span>
+                                  </div>
+                                )}
+                                {material.elasticity?.shear_modulus?.vrh != null && (
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-400">Shear Modulus:</span>
+                                    <span className="font-medium text-gray-200">{material.elasticity.shear_modulus!.vrh.toFixed(2)} GPa</span>
+                                  </div>
+                                )}
+                                {material.elasticity?.young_modulus != null && (
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-400">Young&apos;s Modulus:</span>
+                                    <span className="font-medium text-gray-200">{material.elasticity.young_modulus!.toFixed(2)} GPa</span>
+                                  </div>
+                                )}
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Poisson&apos;s Ratio:</span>
+                                  <span className="font-medium text-gray-200">{material.homogeneous_poisson.toFixed(4)}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Anisotropy:</span>
+                                  <span className="font-medium text-gray-200">{material.universal_anisotropy.toFixed(4)}</span>
+                                </div>
                               </div>
-                            )}
-                            {material.symmetry.point_group && (
-                              <div className="flex justify-between">
-                                <span className="text-gray-400">Point Group:</span>
-                                <span className="font-medium text-gray-200">{material.symmetry.point_group}</span>
-                              </div>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </div>
 
+                              {/* Symmetry */}
+                              <div className="border-t border-gray-600 pt-2 space-y-1">
+                                <h4 className="text-xs font-semibold text-blue-400 uppercase tracking-wider mb-2">Symmetry</h4>
+                                <div className="flex justify-between">
+                                  <span className="text-gray-400">Crystal System:</span>
+                                  <span className="font-medium text-gray-200">{material.symmetry.crystal_system}</span>
+                                </div>
+                                {material.symmetry.symbol && (
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-400">Space Group:</span>
+                                    <span className="font-medium text-gray-200">{material.symmetry.symbol} (#{material.symmetry.number})</span>
+                                  </div>
+                                )}
+                                {material.symmetry.point_group && (
+                                  <div className="flex justify-between">
+                                    <span className="text-gray-400">Point Group:</span>
+                                    <span className="font-medium text-gray-200">{material.symmetry.point_group}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+                        <button
+                          onClick={() => toggleExpanded(material.material_id)}
+                          className="mt-4 w-full flex items-center justify-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium py-2 border-t border-gray-600 transition-colors"
+                        >
+                          {isExpanded ? (
+                            <><span>Show Less</span><ChevronUp className="h-4 w-4" /></>
+                          ) : (
+                            <><span>Show More Details</span><ChevronDown className="h-4 w-4" /></>
+                          )}
+                        </button>
+                      </div>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {!randomMaterial && filteredMaterials.length > 3 && (
+                  <div className="text-center mt-6">
                     <button
-                      onClick={() => toggleExpanded(material.material_id)}
-                      className="mt-4 w-full flex items-center justify-center gap-2 text-blue-400 hover:text-blue-300 text-sm font-medium py-2 border-t border-gray-600 transition-colors"
+                      onClick={() => { if (showAll) setExpandedMaterials(new Set()); setShowAll(!showAll) }}
+                      className="px-6 py-2 border border-gray-500 text-gray-300 hover:border-blue-500 hover:text-blue-400 rounded-lg text-sm font-medium transition-colors"
                     >
-                      {isExpanded ? (
-                        <><span>Show Less</span><ChevronUp className="h-4 w-4" /></>
-                      ) : (
-                        <><span>Show More Details</span><ChevronDown className="h-4 w-4" /></>
-                      )}
+                      {showAll ? 'Show Less' : `Show ${filteredMaterials.length - 3} more results`}
                     </button>
                   </div>
-                  )
-                })}
-              </div>
-            </div>
+                )}
 
-            {!randomMaterial && filteredMaterials.length > 3 && (
-              <div className="text-center mt-6">
-                <button
-                  onClick={() => { if (showAll) setExpandedMaterials(new Set()); setShowAll(!showAll) }}
-                  className="px-6 py-2 border border-gray-500 text-gray-300 hover:border-blue-500 hover:text-blue-400 rounded-lg text-sm font-medium transition-colors"
-                >
-                  {showAll ? 'Show Less' : `Show ${filteredMaterials.length - 3} more results`}
-                </button>
-              </div>
-            )}
-
-            {displayMaterials.length === 0 && (
+                {displayMaterials.length === 0 && (
+                  <div className="text-center text-white py-12">
+                    <p className="text-xl">No materials found matching your criteria.</p>
+                    <p className="text-gray-400 mt-2">Try adjusting your filters or search query.</p>
+                  </div>
+                )}
+              </>
+            ) : (
               <div className="text-center text-white py-12">
-                <p className="text-xl">No materials found matching your criteria.</p>
-                <p className="text-gray-400 mt-2">Try adjusting your filters or search query.</p>
+                <Search className="h-16 w-16 mx-auto mb-4 text-gray-500" />
+                <p className="text-xl mb-2">Ready to explore Aim materials?</p>
+                <p className="text-gray-400">
+                  Use the search bar, apply filters, or click &quot;Feeling Lucky?&quot; to get started.
+                </p>
               </div>
             )}
-          </>
-        ) : (
-          <div className="text-center text-white py-12">
-            <Search className="h-16 w-16 mx-auto mb-4 text-gray-500" />
-            <p className="text-xl mb-2">Ready to explore Aim materials?</p>
-            <p className="text-gray-400">
-              Use the search bar, apply filters, or click &quot;Feeling Lucky?&quot; to get started.
-            </p>
           </div>
-        )}
+        </div>
       </div>
     </div>
   )

@@ -33,39 +33,62 @@ export default function Footer() {
                   <p>Gyunho Kim · <a href="mailto:ghkim887@gmail.com" className="hover:text-gray-400 transition-colors">ghkim887@gmail.com</a></p>
                 </div>
               </div>
+
+              <div className="pt-3">
+                <h4 className="text-lg md:text-xl font-semibold text-white mb-3">GitHub Repositories</h4>
+                <div className="space-y-2">
+                  <a
+                    href="https://github.com/snoo53/Aim-Materials"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open Aim Materials GitHub repository"
+                    title="Aim Materials GitHub repository"
+                    className="group flex items-center gap-3 rounded-lg border border-gray-600 bg-gray-800/60 px-3 py-2 hover:border-blue-400 hover:bg-gray-800 transition-colors w-fit"
+                  >
+                    <span className="inline-flex items-center justify-center w-9 h-9 bg-gray-200 text-gray-900 rounded-md group-hover:bg-white transition-colors">
+                      <GitHubIcon className="h-5 w-5" />
+                    </span>
+                    <span className="text-sm text-gray-200 group-hover:text-white">Aim Materials</span>
+                  </a>
+                  <a
+                    href="https://github.com/snoo53/Website-Hosting"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open Aim Materials website hosting GitHub repository"
+                    title="Aim Materials website hosting GitHub repository"
+                    className="group flex items-center gap-3 rounded-lg border border-gray-600 bg-gray-800/60 px-3 py-2 hover:border-blue-400 hover:bg-gray-800 transition-colors w-fit"
+                  >
+                    <span className="inline-flex items-center justify-center w-9 h-9 bg-gray-200 text-gray-900 rounded-md group-hover:bg-white transition-colors">
+                      <GitHubIcon className="h-5 w-5" />
+                    </span>
+                    <span className="text-sm text-gray-200 group-hover:text-white">Website Hosting</span>
+                  </a>
+                </div>
+              </div>
             </div>
 
             {/* Full Paper Link */}
             <div className="space-y-6 flex-1">
               <h3 className="text-3xl md:text-4xl font-bold text-white">Read the Full Paper</h3>
               <a
-                href="#"
+                href="/papers/aim-materials-jmst-manuscript.pdf"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium rounded-lg transition-colors text-lg"
+                className="group inline-flex items-center rounded-lg border border-gray-600 bg-gray-800/60 px-4 py-3 hover:border-blue-400 hover:bg-gray-800 transition-colors w-fit"
               >
-                Read the Full Paper
+                <span className="text-base font-medium text-gray-200 group-hover:text-white">Read the Full Paper</span>
               </a>
-              <p className="text-sm text-gray-400">Manuscript in preparation for submission to Computational Materials Science</p>
+              <p className="text-xs text-gray-500">PDF · preprint-style manuscript</p>
+              <p className="text-sm text-gray-400">Manuscript submitted to the Journal of Materials Science &amp; Technology.</p>
 
-              <h3 className="text-3xl md:text-4xl font-bold text-white pt-4">MPContribs</h3>
+              <h3 className="text-3xl md:text-4xl font-bold text-white pt-4">Materials Project Dataset</h3>
               <a
-                href="https://next-gen.materialsproject.org/contribs/projects/aim_materials_v1"
+                href="https://contribs.materialsproject.org/projects/aim_materials_v1"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium rounded-lg transition-colors text-lg"
+                className="group inline-flex items-center rounded-lg border border-gray-600 bg-gray-800/60 px-4 py-3 hover:border-blue-400 hover:bg-gray-800 transition-colors w-fit"
               >
-                MPContribs Explorer
-              </a>
-
-              <a
-                href="https://github.com/snoo53/Aim-Materials"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gray-200 hover:bg-gray-300 text-gray-900 font-medium rounded-lg transition-colors text-lg"
-              >
-                <GitHubIcon className="h-5 w-5" />
-                Github
+                <span className="text-base font-medium text-gray-200 group-hover:text-white">Explore on Materials Project</span>
               </a>
             </div>
           </div>

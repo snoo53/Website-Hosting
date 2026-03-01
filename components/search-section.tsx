@@ -31,7 +31,7 @@ interface Material {
     fitting_method: string
     bulk_modulus: { vrh: number } | null
     shear_modulus: { vrh: number } | null
-    young_modulus: number | null
+    young_modulus: number | { vrh?: number | null } | null
   } | null
   qe_validation?: {
     status: string
@@ -44,6 +44,17 @@ interface Material {
     dft_nu_H: number | null
     dft_A_U: number | null
   }
+}
+
+function getYoungModulusVrh(
+  elasticity: Material["elasticity"],
+): number | null {
+  const rawYoung = elasticity?.young_modulus
+  if (typeof rawYoung === "number") return rawYoung
+  if (rawYoung && typeof rawYoung === "object" && typeof rawYoung.vrh === "number") {
+    return rawYoung.vrh
+  }
+  return null
 }
 
 function FilterSlider({
@@ -271,10 +282,10 @@ export default function SearchSection() {
           </div>
         )}
 
-        {/* Filter panel + Results — side by side, both start at same Y */}
-        <div className="flex gap-4 items-start">
+        {/* Filter panel + Results */}
+        <div className="relative">
           {showFilters && (
-            <div className="w-64 shrink-0 bg-gray-700 rounded-lg border-2 border-gray-600 p-3 space-y-2 max-h-[420px] overflow-y-auto">
+            <div className="w-full bg-gray-700 rounded-lg border-2 border-gray-600 p-3 space-y-2 max-h-[420px] overflow-y-auto mb-4 md:mb-0 md:w-64 md:absolute md:top-0 md:left-0 md:-translate-x-[calc(100%+1rem)] md:z-20">
               <div>
                 <h3 className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1.5">Summary Scalars</h3>
                 <div className="space-y-2">
@@ -341,14 +352,15 @@ export default function SearchSection() {
             </div>
           )}
 
-          {/* Results column */}
-          <div className="flex-1 min-w-0">
+          {/* Results column (always full width; filters do not consume grid columns on desktop) */}
+          <div className="min-w-0">
           {shouldShowResults ? (
               <>
                 <div className="max-h-[420px] overflow-y-auto pr-2 custom-scrollbar">
-                  <div className={`grid gap-6 ${showFilters ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"}`}>
+                  <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
                     {displayMaterials.map((material) => {
                     const isExpanded = expandedMaterials.has(material.material_id)
+                    const youngModulusVrh = getYoungModulusVrh(material.elasticity)
 
                     return (
                       <div
@@ -410,10 +422,10 @@ export default function SearchSection() {
                                     <span className="font-medium text-gray-200">{material.elasticity.shear_modulus!.vrh.toFixed(2)} GPa</span>
                                   </div>
                                 )}
-                                {material.elasticity?.young_modulus != null && (
+                                {youngModulusVrh != null && (
                                   <div className="flex justify-between">
                                     <span className="text-gray-400">Young&apos;s Modulus:</span>
-                                    <span className="font-medium text-gray-200">{material.elasticity.young_modulus!.toFixed(2)} GPa</span>
+                                    <span className="font-medium text-gray-200">{youngModulusVrh.toFixed(2)} GPa</span>
                                   </div>
                                 )}
                                 <div className="flex justify-between">
